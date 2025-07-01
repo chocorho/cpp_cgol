@@ -13,10 +13,22 @@ void Cell::init(float size, float c, float r){
 
 void Cell::render(SDL_Renderer* renderer){
 	if(m_alive){
-		SDL_RenderFillRect(renderer, &m_rect);
+		SDL_Rect *m_rect_cpy = new SDL_Rect();
+		m_rect_cpy->x = m_rect.x;
+		m_rect_cpy->y = m_rect.y;
+		m_rect_cpy->w = m_size;
+		m_rect_cpy->h = m_size;
+		SDL_RenderFillRect(renderer, m_rect_cpy);
+		delete m_rect_cpy;  // kinda slow, but it fixes the compiler error and avoids memory leaks!
 	}
 	else{
-		SDL_RenderRect(renderer, &m_rect);
+		SDL_Rect *m_rect_cpy = new SDL_Rect();
+		m_rect_cpy->x = m_rect.x;
+		m_rect_cpy->y = m_rect.y;
+		m_rect_cpy->w = m_size;
+		m_rect_cpy->h = m_size;
+		SDL_RenderDrawRect(renderer, m_rect_cpy);
+		delete m_rect_cpy;
 	}
 }
 

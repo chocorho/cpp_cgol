@@ -1,7 +1,7 @@
 #ifndef CELLS_HPP
 #define CELLS_HPP
 
-#include <SDL3/SDL.h>
+#include <SDL2/SDL.h>
 #include <string>
 
 class Cell{

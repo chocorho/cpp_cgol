@@ -1,13 +1,16 @@
 #include "game.hpp"
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <algorithm>
 
 bool Game::init(std::string cfg_file_path){
 	
-	SDL_SetLogPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_DEBUG);
+	//SDL_SetLogPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_DEBUG);
 	SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Initializing SDL...\n");
-	if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)){
+	int init_result = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS | SDL_INIT_TIMER);
+	if(init_result != 0){
+		std::cout << "Reported error: " << SDL_GetError() << std::endl;
 		SDL_LogCritical(SDL_LOG_CATEGORY_SYSTEM, "Failed to initialize SDL\n");
 		return false;
 	}
@@ -117,13 +120,13 @@ bool Game::init(std::string cfg_file_path){
 	//initializing video --------------------------------------------------------------------------------------------------------------
 	SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Initializing video\n");
 
-	m_window = SDL_CreateWindow(window_title.c_str(), m_window_w, m_window_h, window_flags);
+	m_window = SDL_CreateWindow(window_title.c_str(), 20, 20, m_window_w, m_window_h, window_flags);
 	if(m_window == NULL){
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Could not create window\n");
 		return false;
 	}
 	
-	m_renderer = SDL_CreateRenderer(m_window, NULL);
+	m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED);
 	if(m_renderer == NULL){
 		SDL_LogCritical(SDL_LOG_CATEGORY_VIDEO, "Could not create renderer\n");
 		return false;
@@ -159,14 +162,14 @@ bool Game::init(std::string cfg_file_path){
 
 void Game::handleEvents(){
 	SDL_PollEvent(&m_event);
-	if(m_event.type==SDL_EVENT_QUIT) m_running = false;
+	if(m_event.type==SDL_QUIT) m_running = false;
 
 	//all code below is for what happens if you press (any) mouse button -----------
-	if(m_event.button.down==true){ 
+	if(m_event.type==SDL_MOUSEBUTTONDOWN){
 		int r = (int) m_event.button.y / (int)cell[0][0].getSize();
 		int c = (int) m_event.button.x / (int)cell[0][0].getSize();
 		SDL_Log("Cell clicked: %i, %i", r, c);
-		
+
 		//sets cell to alive or dead
 		cell[r][c].setAlive(!cell[r][c].getAlive());
 		/*
@@ -201,8 +204,8 @@ void Game::handleEvents(){
 	//---------------------------------------------------------------------
 
 	//if you press enter it should step the simulation
-	if(m_event.key.type == SDL_EVENT_KEY_DOWN){
-		switch(m_event.key.key){
+	if(m_event.type == SDL_KEYDOWN){
+		switch(m_event.key.keysym.sym){
 			case SDLK_SPACE:
 				m_step = true;
 				break;
